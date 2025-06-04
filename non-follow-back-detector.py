@@ -1,6 +1,16 @@
 import json
 import webbrowser
 import time
+import glob
+import os
+
+# Config:
+# Number of oldest non-followers to skip from opening in tabs
+skip_oldest_followers = 100
+    
+# Maximum number of tabs to open in the browser
+max_tabs_to_open = 35
+# End Config
 
 def get_user_data_from_file(file_path, key):
     """
@@ -44,21 +54,25 @@ def main():
     Main function to find users you follow who don't follow you back.
     """
     # --- Configuration ---
+    # Path to the directory containing your Instagram data
+    followers_and_following_path = 'followers_and_following/'
+    
     # Path to your 'following.json' file
-    following_file = 'following.json'
+    following_file = os.path.join(followers_and_following_path, 'following.json')
     
-    # List of your follower data files
-    follower_files = [f'followers_{i}.json' for i in range(1, 6)]
-
-    # Number of oldest non-followers to skip from opening in tabs
-    skip_oldest_followers = 30
-    
-    # Maximum number of tabs to open in the browser
-    max_tabs_to_open = 35
+    # Dynamically find all follower files using a wildcard pattern
+    follower_files_pattern = os.path.join(followers_and_following_path, 'followers_*.json')
+    follower_files = glob.glob(follower_files_pattern)
     # --- End Configuration ---
 
+    if not follower_files:
+        print(f"Error: No follower files found in '{followers_and_following_path}'. Make sure your files are in the correct directory.")
+        return
+
+    print(f"Found {len(follower_files)} follower file(s) to process.")
+
     # Get the dictionary of users you are following with their timestamps
-    print("Processing your 'following' list...")
+    print("\nProcessing your 'following' list...")
     following_data = get_user_data_from_file(following_file, 'relationships_following')
     if following_data:
         print(f"Found {len(following_data)} accounts you are following.")
