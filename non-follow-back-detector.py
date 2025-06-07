@@ -6,10 +6,10 @@ import os
 
 # Config:
 # Number of oldest non-followers to skip from opening in tabs
-skip_oldest_followers = 100
+skip_oldest_followers = 0
     
 # Maximum number of tabs to open in the browser
-max_tabs_to_open = 35
+max_tabs_to_open = 37
 # End Config
 
 def get_user_data_from_file(file_path, key):
