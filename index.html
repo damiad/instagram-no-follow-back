@@ -33,6 +33,18 @@
             outline: 2px solid #3b82f6;
             outline-offset: 2px;
         }
+        /* More robust visually hidden class */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
         /* Tooltip styles */
         .has-tooltip {
             position: relative;
@@ -84,7 +96,7 @@
                     <!-- Option A: ZIP Upload -->
                     <div class="has-tooltip">
                         <p class="text-sm text-center font-medium text-gray-600 mb-2">Option A: Upload .zip File</p>
-                        <input type="file" id="zipUpload" accept=".zip" class="hidden file-input">
+                        <input type="file" id="zipUpload" accept=".zip" class="visually-hidden file-input">
                         <label for="zipUpload" class="file-input-label">
                             <span id="zipFileName">Click to select .zip file</span>
                         </label>
@@ -93,7 +105,7 @@
                     <!-- Option B: Directory Upload -->
                     <div class="has-tooltip">
                         <p class="text-sm text-center font-medium text-gray-600 mb-2">Option B: Upload Directory</p>
-                        <input type="file" id="directoryUpload" webkitdirectory directory multiple class="hidden file-input">
+                        <input type="file" id="directoryUpload" webkitdirectory directory multiple class="visually-hidden file-input">
                         <label for="directoryUpload" class="file-input-label">
                             <span id="directoryName">Click to select directory</span>
                         </label>
@@ -109,6 +121,9 @@
                 </button>
             </div>
         </div>
+        
+        <!-- Error message container, moved outside results for cleaner display -->
+        <div id="error" class="hidden p-4 bg-red-100 text-red-700 rounded-lg"></div>
 
         <!-- Results Section -->
         <div id="resultsSection" class="hidden pt-6 border-t border-gray-200">
@@ -119,7 +134,7 @@
                 </svg>
                 <p id="loadingText" class="mt-2 font-medium">Processing files...</p>
             </div>
-            <div id="error" class="hidden p-4 bg-red-100 text-red-700 rounded-lg"></div>
+            
             <div id="summary" class="hidden p-4 bg-blue-100 text-blue-800 rounded-lg text-center mb-6"></div>
             
             <!-- Dynamic Parameters -->
@@ -128,13 +143,17 @@
                     <h3 class="text-lg font-semibold text-gray-700">2. Set Tab Parameters</h3>
                     <div class="has-tooltip">
                         <label for="skipOldest" class="block text-sm font-medium text-gray-600">Skip Oldest Non-Followers</label>
-                        <input type="number" id="skipOldest" value="20" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3">
+                        <input type="number" id="skipOldest" value="0" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3">
                         <div class="tooltip">The tool will not open tabs for this many of the oldest accounts you followed.</div>
                     </div>
                     <div class="has-tooltip">
                         <label for="maxTabs" class="block text-sm font-medium text-gray-600">Max Tabs to Open</label>
-                        <input type="number" id="maxTabs" value="40" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3">
+                        <input type="number" id="maxTabs" value="33" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3">
                         <div class="tooltip">The maximum number of profiles that will be opened in new tabs at once.</div>
+                    </div>
+                     <div class="flex items-start p-3 bg-red-50 text-red-700 text-xs rounded-lg">
+                        <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.21 3.03-1.742 3.03H4.42c-1.532 0-2.492-1.696-1.742-3.03l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-4a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+                        <span><strong>Warning:</strong> To avoid account restrictions, Instagram recommends not following/unfollowing more than 150-200 accounts per day. Please unfollow responsibly.</span>
                     </div>
                 </div>
                 <div class="space-y-6 flex flex-col justify-center items-center h-full">
