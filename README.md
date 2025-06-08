@@ -1,78 +1,75 @@
 # Instagram Non-Follower Detector
 
-This script helps you identify Instagram users you follow who do not follow you back. It's designed to work with the data export provided by Instagram.
+A web-based tool to help you identify Instagram users you follow who do not follow you back. This tool runs entirely in your browser—your data is never uploaded to any server, ensuring your privacy.
+
+**Live Tool**: [**https://damiad.github.io/instagram-no-follow-back/**](https://damiad.github.io/instagram-no-follow-back/)
 
 ## Features
 
-- **Finds Non-Followers**: Compares your "following" list with your "followers" list to find who isn't following you back.
-- **Sorts by Oldest Follow**: Displays the list of non-followers based on when you first followed them, from the oldest to the newest.
-- **Configurable Tab Opening**: Automatically opens a specified number of profiles in Google Chrome for quick review.
-- **Customizable Skipping**: Allows you to skip a certain number of the oldest accounts from being opened in tabs, so you can focus on more recent follows.
-
-## Requirements
-
-- **Python 3**: The script is written in Python 3. You can download it from [python.org](https://www.python.org/).
-- **Google Chrome**: Required for the automatic tab-opening feature.
+-   **Web-Based Interface**: No installation required. Just open the link and upload your data.
+-   **Privacy Focused**: All processing is done client-side in your browser. Your files are never sent to a server.
+-   **Flexible Uploads**: Works with both the `.zip` file from Instagram and an unzipped directory.
+-   **Sorted Results**: Displays the list of non-followers based on when you first followed them, from oldest to newest.
+-   **Bulk Profile Opening**: Opens multiple profiles in new tabs at once to make reviewing them easy.
+-   **Customizable**: Set how many of the oldest accounts to skip and the maximum number of tabs to open.
 
 ---
 
-## Instructions
+## How to Use (Web UI - Recommended)
 
 ### Step 1: Download Your Instagram Data
 
 First, you need to request your "Followers and following" data from Instagram.
 
-**Using the Instagram App:**
+1.  On the Instagram app or website, go to your profile.
+2.  Navigate to **Menu** > **Your activity**.
+3.  Select **Download your information** > **Download or transfer information**.
+4.  Choose **Some of your information**.
+5.  Select only **"Followers and following"** and tap **Next**.
+6.  Choose **Download to device** and tap **Next**.
+7.  Set the format to **JSON** and the date range to **All time**. Tap **Save**.
 
-1.  Go to your profile by tapping your profile picture in the bottom right.
-2.  Tap the three horizontal lines (Menu) in the top right.
-3.  Select **"Your activity"**.
-4.  Tap **"Download your information"** and then **"Download or transfer information"**.
-5.  Choose **"Some of your information"**.
-6.  Select **"Followers and following"** and tap **"Next"**.
-7.  Choose **"Download to device"** and tap **"Next"**.
-8.  Select your desired date range (**"All time"** is recommended for a complete list) and make sure the format is set to **JSON**. Tap **"Save"**.
+Instagram will notify you when your `.zip` file is ready to download.
 
-Instagram will compile your data and notify you via email and in the app when the download is ready. This can take some time.
+### Step 2: Use the Web Tool
 
-### Step 2: Prepare Your Files
+1.  Go to the live tool: [**https://damiad.github.io/instagram-no-follow-back/**](https://damiad.github.io/instagram-no-follow-back/)
+2.  Upload your data using one of the two options:
+    -   **Option A (Recommended):** Upload the entire `.zip` file you downloaded from Instagram.
+    -   **Option B:** If you unzipped the file, upload the parent directory (e.g., `connections`).
+3.  Adjust the "Skip Oldest" and "Max Tabs" parameters if needed.
+4.  Click the **Find Non-Followers** button.
 
-1.  Once your download is complete, download the `.zip` file from Instagram.
-2.  Unzip the file. Inside, navigate to the `followers_and_following` folder.
-3.  You will find the following files:
-    - `following.json`
-    - `followers_1.json`
-    - `followers_2.json` (and possibly more, depending on your follower count)
-4.  Place the `followers_and_following` folder in same directory as script (`non-follow-back-detector.py`).
+### Step 3: Review the Results
 
-Your folder should look something like this:
+The tool will display a sorted list of users who don't follow you back.
 
-```
-non-follow-back-detector.py
-followers_and_following/
-├── following.json
-├── followers_1.json
-├── followers_2.json
-└── ... and so on
-```
+> **IMPORTANT: Enable Pop-ups!**
+> When you click the **"Open Profiles in New Tabs"** button, your browser will likely block the pop-ups initially. **Look for a pop-up blocked icon** in your browser's address bar. Click it and choose **"Always allow pop-ups and redirects from..."** for the site to work correctly.
 
-### Step 3: Configure the Script (Optional)
+---
 
-You can customize the script's behavior by editing these variables at the top of the file:
+## Alternative Method (Python Script)
 
-- `skip_oldest_followers`: The number of oldest non-followers to skip from being opened in browser tabs. They will still be listed in the terminal. (Default: `100`)
-- `max_tabs_to_open`: The maximum number of profiles to open in Chrome after the skipped group. (Default: `35`)
+For users who prefer a command-line interface, the original Python script is still available in the repository.
 
-### Step 4: Run the Script
+### Requirements
 
-1.  Open your Terminal (on macOS/Linux) or Command Prompt (on Windows).
-2.  Navigate to the `instagram-no-follow-back` directory where your files are located.
-    ```bash
-    cd path/to/your/repository
-    ```
-3.  Run the script using Python 3:
+-   **Python 3**: Download from [python.org](https://www.python.org/).
+
+### Instructions
+
+1.  Download your Instagram data as described in Step 1 above and unzip it.
+2.  Place the `followers_and_following` directory inside the project folder.
+3.  Run the script from your terminal:
     ```bash
     python3 non-follow-back-detector.py
     ```
 
-The script will then process your files, print the complete sorted list of non-followers to the terminal, and open the specified profiles in new Chrome tabs.
+---
+
+## Creator
+
+Created by **[dadabrowski](https://www.instagram.com/dadabrowski/)**.
+
+View the code and contribute on **[GitHub](https://github.com/damiad/instagram-no-follow-back)**.
