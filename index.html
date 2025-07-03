@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram Non-Follower Detector</title>
+    <title>Instagram Data Analyzer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -33,7 +33,6 @@
             outline: 2px solid #3b82f6;
             outline-offset: 2px;
         }
-        /* More robust visually hidden class */
         .visually-hidden {
             position: absolute;
             width: 1px;
@@ -45,7 +44,6 @@
             white-space: nowrap;
             border-width: 0;
         }
-        /* Tooltip styles */
         .has-tooltip {
             position: relative;
         }
@@ -78,22 +76,19 @@
 <body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
 
     <div class="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-10 space-y-8">
-        <!-- Header -->
         <div class="text-center">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Instagram Non-Follow Back Detector</h1>
-            <p class="mt-2 text-gray-600">Find out who you follow that doesn't follow you back.</p>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Instagram Data Analyzer</h1>
+            <p class="mt-2 text-gray-600">Analyze your followers, following, and pending requests.</p>
             <div class="mt-4">
-                <button id="instructionsBtn" class="text-indigo-600 hover:text-indigo-800 font-semibold text-sm">How to download your Followers & Following Lists?</button>
+                <button id="instructionsBtn" class="text-indigo-600 hover:text-indigo-800 font-semibold text-sm">How to download your Instagram Data?</button>
             </div>
         </div>
 
         <div id="uploadSection" class="space-y-8">
-             <!-- Data Upload Section -->
-            <div class="space-y-4">
-                <h3 class="text-lg font-semibold text-gray-700 text-center">1. Upload Your Followers & Following Lists</h3>
+             <div class="space-y-4">
+                <h3 class="text-lg font-semibold text-gray-700 text-center">1. Upload Your Instagram Data File</h3>
                 <p class="text-sm text-gray-500 text-center">Your data is processed in your browser and is never uploaded to a server.</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                    <!-- Option A: ZIP Upload -->
                     <div class="has-tooltip">
                         <p class="text-sm text-center font-medium text-gray-600 mb-2">Option A: Upload .zip File</p>
                         <input type="file" id="zipUpload" accept=".zip" class="visually-hidden file-input">
@@ -102,30 +97,29 @@
                         </label>
                         <div class="tooltip">Upload the complete .zip file you downloaded directly from Instagram. This is the easiest method.</div>
                     </div>
-                    <!-- Option B: Directory Upload -->
                     <div class="has-tooltip">
                         <p class="text-sm text-center font-medium text-gray-600 mb-2">Option B: Upload Directory</p>
                         <input type="file" id="directoryUpload" webkitdirectory directory multiple class="visually-hidden file-input">
                         <label for="directoryUpload" class="file-input-label">
                             <span id="directoryName">Click to select directory</span>
                         </label>
-                        <div class="tooltip">If you unzipped the file, you can select the parent folder (e.g., 'connections').</div>
+                        <div class="tooltip">If you unzipped the file, you can select the parent folder (e.g., 'instagram-username_....').</div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Action Button -->
-            <div class="text-center pt-4">
-                <button id="processBtn" class="w-full md:w-1/2 bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform transform hover:scale-105">
-                    Find Non-Followers
+
+            <div id="actionButtons" class="hidden text-center pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button id="processNonFollowersBtn" class="bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform transform hover:scale-105">
+                    List Non-Followers
+                </button>
+                 <button id="processPendingBtn" class="bg-purple-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-transform transform hover:scale-105">
+                    List Pending Requests
                 </button>
             </div>
         </div>
-        
-        <!-- Error message container, moved outside results for cleaner display -->
+
         <div id="error" class="hidden p-4 bg-red-100 text-red-700 rounded-lg"></div>
 
-        <!-- Results Section -->
         <div id="resultsSection" class="hidden pt-6 border-t border-gray-200">
             <div id="loading" class="hidden text-center">
                 <svg class="animate-spin h-8 w-8 text-indigo-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -134,17 +128,16 @@
                 </svg>
                 <p id="loadingText" class="mt-2 font-medium">Processing files...</p>
             </div>
-            
+
             <div id="summary" class="hidden p-4 bg-blue-100 text-blue-800 rounded-lg text-center mb-6"></div>
-            
-            <!-- Dynamic Parameters -->
+
             <div id="parametersSection" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8 items-start mb-6">
                 <div class="space-y-6">
-                    <h3 class="text-lg font-semibold text-gray-700">2. Set Tab Parameters</h3>
+                    <h3 class="text-lg font-semibold text-gray-700">2. Review & Open Profiles</h3>
                     <div class="has-tooltip">
-                        <label for="skipOldest" class="block text-sm font-medium text-gray-600">Skip Oldest Non-Followers</label>
+                        <label for="skipOldest" class="block text-sm font-medium text-gray-600">Skip Oldest Accounts</label>
                         <input type="number" id="skipOldest" value="0" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3">
-                        <div class="tooltip">The tool will not open tabs for this many of the oldest accounts you followed.</div>
+                        <div class="tooltip">The tool will not open tabs for this many of the oldest accounts in the list.</div>
                     </div>
                     <div class="has-tooltip">
                         <label for="maxTabs" class="block text-sm font-medium text-gray-600">Max Tabs to Open</label>
@@ -153,7 +146,7 @@
                     </div>
                      <div class="flex items-start p-3 bg-red-50 text-red-700 text-xs rounded-lg">
                         <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.21 3.03-1.742 3.03H4.42c-1.532 0-2.492-1.696-1.742-3.03l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-4a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
-                        <span><strong>Warning:</strong> To avoid account restrictions, Instagram recommends not following/unfollowing more than 150-200 accounts per day. Please unfollow responsibly.</span>
+                        <span><strong>Warning:</strong> To avoid account restrictions, Instagram recommends not following/unfollowing more than 150-200 accounts per day. Please unfollow/cancel requests responsibly.</span>
                     </div>
                 </div>
                 <div class="space-y-6 flex flex-col justify-center items-center h-full">
@@ -162,7 +155,7 @@
                             Open Profiles in New Tabs
                         </button>
                         <div id="popupWarning" class="hidden mt-3 p-3 bg-yellow-100 text-yellow-800 text-sm rounded-lg">
-                            <strong>Pop-up Blocked?</strong> Look for a pop-up blocked icon in your browser's address bar and choose "Always allow pop-ups" for this site. Then again click <strong>Open Profiles in New Tabs</strong> - it should work.
+                            <strong>Pop-up Blocked?</strong> Look for a pop-up blocked icon in your browser's address bar and choose "Always allow pop-ups" for this site. Then click the button again.
                         </div>
                     </div>
                 </div>
@@ -170,8 +163,7 @@
             <button id="startOverBtn" class="hidden mb-4 w-full md:w-auto bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300">Start Over</button>
             <div id="userList" class="max-h-96 overflow-y-auto space-y-2 pr-2"></div>
         </div>
-        
-        <!-- Footer with Creator Credits -->
+
         <footer class="text-center text-xs text-gray-500 pt-6 border-t border-gray-200 space-y-4">
             <div>
                 <h4 class="font-semibold text-sm text-gray-600 mb-2">Did you find this tool useful?</h4>
@@ -198,8 +190,7 @@
             </div>
         </footer>
     </div>
-    
-    <!-- Instructions Modal -->
+
     <div id="instructionsModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center p-4 z-50">
         <div class="relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto p-6 md:p-8">
             <div class="flex justify-between items-center mb-4">
@@ -209,13 +200,13 @@
                 </button>
             </div>
             <div class="space-y-4 text-gray-600 text-sm">
-                <p>To use this tool, you first need to request your "Followers and following" data from Instagram.</p>
+                <p>To use this tool, you need to request your information from Instagram. Make sure to select the JSON format.</p>
                 <ol class="list-decimal list-inside space-y-3">
                     <li>Go to your profile and tap the <strong>Menu</strong> icon (☰) in the top right.</li>
                     <li>Select <strong>"Your activity"</strong>.</li>
                     <li>Tap <strong>"Download your information"</strong>, then <strong>"Download or transfer information"</strong>.</li>
                     <li>Choose <strong>"Some of your information"</strong>.</li>
-                    <li>Select only <strong>"Followers and following"</strong> from the list and tap <strong>"Next"</strong>.</li>
+                    <li>Select <strong>"Followers and following"</strong> from the list and tap <strong>"Next"</strong>. This single download contains all the necessary files (followers, following, and pending requests).</li>
                     <li>Choose <strong>"Download to device"</strong> and tap <strong>"Next"</strong>.</li>
                     <li>Set the format to <code class="bg-gray-200 text-red-600 font-mono px-1 rounded">JSON</code> and the date range to <code class="bg-gray-200 px-1 rounded">All time</code>. This is important!</li>
                     <li>Tap <strong>"Save"</strong>. Instagram will email you a link to a `.zip` file when it's ready.</li>
@@ -233,13 +224,15 @@
             const zipFileNameEl = document.getElementById('zipFileName');
             const directoryUploadInput = document.getElementById('directoryUpload');
             const directoryNameEl = document.getElementById('directoryName');
-            const processBtn = document.getElementById('processBtn');
+            const actionButtons = document.getElementById('actionButtons');
+            const processNonFollowersBtn = document.getElementById('processNonFollowersBtn');
+            const processPendingBtn = document.getElementById('processPendingBtn');
             const startOverBtn = document.getElementById('startOverBtn');
-            
+
             // Param inputs
             const skipOldestInput = document.getElementById('skipOldest');
             const maxTabsInput = document.getElementById('maxTabs');
-            
+
             // Sections and containers
             const uploadSection = document.getElementById('uploadSection');
             const resultsSection = document.getElementById('resultsSection');
@@ -252,38 +245,45 @@
             const openTabsBtn = document.getElementById('openTabsBtn');
             const popupWarningEl = document.getElementById('popupWarning');
             const userListEl = document.getElementById('userList');
-            
+
             // Modal elements
             const instructionsBtn = document.getElementById('instructionsBtn');
             const instructionsModal = document.getElementById('instructionsModal');
             const closeModalBtn = document.getElementById('closeModalBtn');
-            
-            let processedData = [];
 
-            // --- Event Listeners ---
-            zipUploadInput.addEventListener('change', () => {
-                const file = zipUploadInput.files[0];
-                if (file) {
-                    zipFileNameEl.textContent = `Selected: ${file.name}`;
+            let processedData = [];
+            let currentMode = ''; // 'non-followers' or 'pending'
+
+            // --- File Processing Logic ---
+            const handleFileSelection = () => {
+                const zipFile = zipUploadInput.files[0];
+                const dirFiles = directoryUploadInput.files;
+
+                if (zipFile) {
+                    zipFileNameEl.textContent = `Selected: ${zipFile.name}`;
                     directoryUploadInput.value = '';
                     directoryNameEl.textContent = 'Click to select directory';
-                }
-            });
-
-            directoryUploadInput.addEventListener('change', () => {
-                const files = directoryUploadInput.files;
-                if (files.length > 0) {
-                    const path = files[0].webkitRelativePath;
+                    actionButtons.classList.remove('hidden');
+                } else if (dirFiles.length > 0) {
+                    const path = dirFiles[0].webkitRelativePath;
                     const dirName = path.split('/')[0];
                     directoryNameEl.textContent = `Selected: ${dirName}`;
                     zipUploadInput.value = '';
                     zipFileNameEl.textContent = 'Click to select .zip file';
+                    actionButtons.classList.remove('hidden');
+                } else {
+                     actionButtons.classList.add('hidden');
                 }
-            });
-            
-            processBtn.addEventListener('click', handleProcess);
+            };
+
+            // --- Event Listeners ---
+            zipUploadInput.addEventListener('change', handleFileSelection);
+            directoryUploadInput.addEventListener('change', handleFileSelection);
+
+            processNonFollowersBtn.addEventListener('click', () => startProcessing('non-followers'));
+            processPendingBtn.addEventListener('click', () => startProcessing('pending'));
             startOverBtn.addEventListener('click', () => window.location.reload());
-            
+
             instructionsBtn.addEventListener('click', () => instructionsModal.classList.remove('hidden'));
             closeModalBtn.addEventListener('click', () => instructionsModal.classList.add('hidden'));
             instructionsModal.addEventListener('click', (e) => {
@@ -302,7 +302,7 @@
                     reader.readAsText(file);
                 });
             }
-            
+
             function parseJsonData(text, filePath) {
                 try {
                     return JSON.parse(text);
@@ -313,8 +313,10 @@
 
             function getUserData(jsonData, filePath) {
                 const userData = {};
-                let dataList = jsonData.relationships_following || jsonData;
-                if (!Array.isArray(dataList)) throw new Error(`Expected an array of users in ${filePath}.`);
+                // Handle both `following.json` and `pending_follow_requests.json` structures
+                let dataList = jsonData.relationships_following || jsonData.relationships_follow_requests_sent || jsonData;
+                 if (!Array.isArray(dataList)) throw new Error(`Expected an array of users in ${filePath}.`);
+
                 for (const item of dataList) {
                     if (item?.string_list_data) {
                         for (const entry of item.string_list_data) {
@@ -338,70 +340,80 @@
                 return usernames;
             }
 
-            async function handleProcess() {
+            async function startProcessing(mode) {
+                currentMode = mode;
                 resetUIForProcessing();
                 const zipFile = zipUploadInput.files[0];
                 const directoryFiles = Array.from(directoryUploadInput.files);
 
                 if (!zipFile && directoryFiles.length === 0) {
-                    showError("Please select a .zip file or a directory.");
+                    showError("Please select a .zip file or a directory first.");
                     return;
                 }
 
                 try {
-                    let followingData;
-                    const followerUsernames = new Set();
-                    
+                    let fileContents = new Map();
+
                     if (zipFile) {
-                        loadingTextEl.textContent = 'Unzipping and processing files...';
+                        loadingTextEl.textContent = 'Unzipping and reading files...';
                         const zip = await JSZip.loadAsync(zipFile);
-                        const zipFiles = Object.values(zip.files);
-                        
-                        const followingFileEntry = zipFiles.find(f => f.name.endsWith('followers_and_following/following.json'));
-                        const followerFileEntries = zipFiles.filter(f => f.name.includes('followers_and_following/followers_') && f.name.endsWith('.json'));
-
-                        if (!followingFileEntry) throw new Error("Could not find `following.json` inside the zip file's `followers_and_following` folder.");
-                        if (followerFileEntries.length === 0) throw new Error("Could not find any `followers_*.json` files inside the zip file.");
-
-                        const followingText = await followingFileEntry.async("string");
-                        followingData = getUserData(parseJsonData(followingText, 'following.json'), 'following.json');
-                        
-                        await Promise.all(followerFileEntries.map(async entry => {
-                            const followerText = await entry.async("string");
-                            const usernames = getFollowerUsernames(parseJsonData(followerText, entry.name), entry.name);
-                            usernames.forEach(u => followerUsernames.add(u));
-                        }));
-                    } 
-                    else {
-                        loadingTextEl.textContent = 'Processing files...';
-                        const relevantFiles = directoryFiles.filter(f => f.webkitRelativePath.includes('followers_and_following/'));
-                        if (relevantFiles.length === 0) throw new Error("Could not find a 'followers_and_following' sub-directory.");
-                        
-                        const followingFile = relevantFiles.find(f => f.name === 'following.json');
-                        const followerFiles = relevantFiles.filter(f => f.name.startsWith('followers_') && f.name.endsWith('.json'));
-
-                        if (!followingFile) throw new Error("Directory must contain `following.json`.");
-                        if (followerFiles.length === 0) throw new Error("Directory must contain at least one `followers_*.json` file.");
-                        
-                        const followingText = await readFileAsText(followingFile);
-                        followingData = getUserData(parseJsonData(followingText, 'following.json'), 'following.json');
-
-                        await Promise.all(followerFiles.map(async file => {
-                            const followerText = await readFileAsText(file);
-                            const usernames = getFollowerUsernames(parseJsonData(followerText, file.name), file.name);
-                            usernames.forEach(u => followerUsernames.add(u));
-                        }));
+                        for (const file of Object.values(zip.files)) {
+                            if (file.name.endsWith('.json') && !file.dir) {
+                                const content = await file.async("string");
+                                fileContents.set(file.name, content);
+                            }
+                        }
+                    } else {
+                        loadingTextEl.textContent = 'Reading files...';
+                        const relevantFiles = directoryFiles.filter(f => f.name.endsWith('.json'));
+                        for (const file of relevantFiles) {
+                            const content = await readFileAsText(file);
+                            // Use the full relative path to ensure uniqueness and find files in subdirectories
+                            fileContents.set(file.webkitRelativePath, content);
+                        }
                     }
+                    
+                    loadingTextEl.textContent = 'Analyzing data...';
 
-                    const notFollowingBackUsernames = Object.keys(followingData).filter(u => !followerUsernames.has(u));
-                    processedData = notFollowingBackUsernames
-                        .map(username => ({ username, timestamp: followingData[username] }))
-                        .sort((a, b) => a.timestamp - b.timestamp);
-                    
-                    const followingCount = Object.keys(followingData).length;
-                    const followersCount = followerUsernames.size;
-                    
-                    displayResults(followingCount, followersCount);
+                    if (mode === 'non-followers') {
+                        const followingFilePath = [...fileContents.keys()].find(path => path.endsWith('followers_and_following/following.json'));
+                        const followerFilePaths = [...fileContents.keys()].filter(path => path.includes('followers_and_following/followers_') && path.endsWith('.json'));
+
+                        if (!followingFilePath) throw new Error("Could not find `following.json` inside the `followers_and_following` folder.");
+                        if (followerFilePaths.length === 0) throw new Error("Could not find any `followers_*.json` files.");
+
+                        const followingText = fileContents.get(followingFilePath);
+                        const followingData = getUserData(parseJsonData(followingText, 'following.json'), 'following.json');
+                        
+                        const followerUsernames = new Set();
+                        for(const path of followerFilePaths) {
+                            const followerText = fileContents.get(path);
+                            const usernames = getFollowerUsernames(parseJsonData(followerText, path), path);
+                            usernames.forEach(u => followerUsernames.add(u));
+                        }
+
+                        const notFollowingBackUsernames = Object.keys(followingData).filter(u => !followerUsernames.has(u));
+                        processedData = notFollowingBackUsernames
+                            .map(username => ({ username, timestamp: followingData[username] }))
+                            .sort((a, b) => a.timestamp - b.timestamp);
+                        
+                        const followingCount = Object.keys(followingData).length;
+                        const followersCount = followerUsernames.size;
+                        displayResults(followingCount, followersCount);
+
+                    } else if (mode === 'pending') {
+                        const pendingFilePath = [...fileContents.keys()].find(path => path.endsWith('followers_and_following/pending_follow_requests.json'));
+                        if (!pendingFilePath) throw new Error("Could not find `pending_follow_requests.json`. Make sure it's in your `followers_and_following` folder from your data export.");
+
+                        const pendingText = fileContents.get(pendingFilePath);
+                        const pendingData = getUserData(parseJsonData(pendingText, 'pending_follow_requests.json'), 'pending_follow_requests.json');
+                        
+                        processedData = Object.entries(pendingData)
+                            .map(([username, timestamp]) => ({ username, timestamp }))
+                            .sort((a, b) => a.timestamp - b.timestamp);
+                        
+                        displayResults();
+                    }
 
                 } catch (error) {
                     showError(`An error occurred: ${error.message}`);
@@ -409,26 +421,33 @@
                     loadingEl.classList.add('hidden');
                 }
             }
-            
-            function displayResults(followingCount, followersCount) {
+
+            function displayResults(followingCount = 0, followersCount = 0) {
                 uploadSection.classList.add('hidden');
                 resultsSection.classList.remove('hidden');
                 parametersSection.classList.remove('hidden');
                 startOverBtn.classList.remove('hidden');
-                
-                summaryEl.innerHTML = `Found <strong>${processedData.length}</strong> user(s) who don't follow you back.<br>Analyzed <strong>${followingCount}</strong> following and <strong>${followersCount}</strong> followers.`;
+
+                if (currentMode === 'non-followers') {
+                    summaryEl.innerHTML = `Found <strong>${processedData.length}</strong> user(s) who don't follow you back.<br>Analyzed <strong>${followingCount}</strong> following and <strong>${followersCount}</strong> followers.`;
+                } else { // pending
+                    summaryEl.innerHTML = `Found <strong>${processedData.length}</strong> pending follow request(s) sent from your account.`;
+                }
                 summaryEl.classList.remove('hidden');
-                
+
                 updateVisuals();
             }
-            
+
             function updateVisuals() {
                 if (processedData.length === 0) {
-                    userListEl.innerHTML = `<p class="text-center text-gray-500">Looks like everyone you follow follows you back. Great!</p>`;
+                    const message = currentMode === 'non-followers'
+                        ? "Looks like everyone you follow follows you back. Great!"
+                        : "You have no pending follow requests.";
+                    userListEl.innerHTML = `<p class="text-center text-gray-500">${message}</p>`;
                     parametersSection.classList.add('hidden');
                     return;
                 }
-                
+
                 const skipCount = parseInt(skipOldestInput.value) || 0;
                 const maxTabs = parseInt(maxTabsInput.value) || 0;
 
@@ -446,6 +465,8 @@
                 } else {
                     tabOpenContainer.classList.add('hidden');
                 }
+                
+                const actionText = currentMode === 'non-followers' ? 'Followed' : 'Requested';
 
                 userListEl.innerHTML = processedData.map((user, index) => {
                     const date = new Date(user.timestamp * 1000).toLocaleDateString();
@@ -460,7 +481,7 @@
                         <div class="flex items-center justify-between p-3 rounded-lg border ${highlightClass}">
                             <div class="font-medium text-gray-800">${index + 1}. ${user.username}</div>
                             <div class="flex items-center space-x-4">
-                                <span class="text-sm text-gray-500">Followed: ${date}</span>
+                                <span class="text-sm text-gray-500">${actionText}: ${date}</span>
                                 <a href="https://www.instagram.com/${user.username}" target="_blank" class="text-indigo-600 hover:text-indigo-800 font-semibold">
                                     Visit Profile →
                                 </a>
@@ -468,10 +489,10 @@
                         </div>
                     `;
                 }).join('');
-                
+
                 const existingLegend = document.getElementById('result-legend');
                 if(existingLegend) existingLegend.remove();
-                
+
                 const legend = `
                     <div id="result-legend" class="flex flex-wrap justify-center gap-4 mt-6 text-xs">
                         <div class="flex items-center gap-2"><div class="w-4 h-4 rounded bg-yellow-50 border-yellow-200"></div><span>Skipped from tab opening</span></div>
@@ -499,6 +520,7 @@
                 loadingEl.classList.add('hidden');
                 errorEl.textContent = message;
                 errorEl.classList.remove('hidden');
+                actionButtons.classList.add('hidden');
             }
         });
     </script>
