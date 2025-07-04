@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram Data Analyzer</title>
+    <title>Instagram Non Follow Back Detector</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -77,7 +77,7 @@
 
     <div class="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-10 space-y-8">
         <div class="text-center">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Instagram Data Analyzer</h1>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Instagram Non Follow Back Detector</h1>
             <p class="mt-2 text-gray-600">Analyze your followers, following, and pending requests.</p>
             <div class="mt-4">
                 <button id="instructionsBtn" class="text-indigo-600 hover:text-indigo-800 font-semibold text-sm">How to download your Instagram Data?</button>
@@ -200,16 +200,23 @@
                 </button>
             </div>
             <div class="space-y-4 text-gray-600 text-sm">
-                <p>To use this tool, you need to request your information from Instagram. Make sure to select the JSON format.</p>
+                <p>To use this tool, you need to request your data from Instagram through the <strong>Accounts Center</strong>. For the latest official instructions, visit the <a href="https://help.instagram.com/181231772500920" target="_blank" class="font-medium text-indigo-600 hover:underline">Instagram Help Center</a>.</p>
+                
+                <h4 class="font-semibold text-base text-gray-800 pt-2">Here’s how to do it:</h4>
                 <ol class="list-decimal list-inside space-y-3">
-                    <li>Go to your profile and tap the <strong>Menu</strong> icon (☰) in the top right.</li>
-                    <li>Select <strong>"Your activity"</strong>.</li>
-                    <li>Tap <strong>"Download your information"</strong>, then <strong>"Download or transfer information"</strong>.</li>
-                    <li>Choose <strong>"Some of your information"</strong>.</li>
-                    <li>Select <strong>"Followers and following"</strong> from the list and tap <strong>"Next"</strong>. This single download contains all the necessary files (followers, following, and pending requests).</li>
-                    <li>Choose <strong>"Download to device"</strong> and tap <strong>"Next"</strong>.</li>
-                    <li>Set the format to <code class="bg-gray-200 text-red-600 font-mono px-1 rounded">JSON</code> and the date range to <code class="bg-gray-200 px-1 rounded">All time</code>. This is important!</li>
-                    <li>Tap <strong>"Save"</strong>. Instagram will email you a link to a `.zip` file when it's ready.</li>
+                    <li>Go to your profile and tap the <strong>Menu icon</strong> (☰) in the top right.</li>
+                    <li>Tap <strong>Accounts Center</strong>, then tap <strong>Your information and permissions</strong>.</li>
+                    <li>Tap <strong>Download your information</strong>, then tap <strong>Request a download</strong>.</li>
+                    <li>Select <strong>Some of your information</strong>.</li>
+                    <li>Scroll down and select only <strong>Followers and following</strong> from the list, then tap <strong>Next</strong>. (This single option includes followers, following, and pending requests).</li>
+                    <li>Make sure <strong>Download to device</strong> is selected and tap <strong>Next</strong>.</li>
+                    <li>For the file options, you <strong>must</strong> select:
+                        <ul class="list-disc list-inside pl-5 mt-2 space-y-1">
+                            <li>Date range: <code class="bg-gray-200 text-red-600 font-mono px-1 rounded">All time</code></li>
+                            <li>Format: <code class="bg-gray-200 text-red-600 font-mono px-1 rounded">JSON</code></li>
+                        </ul>
+                    </li>
+                    <li>Tap <strong>Create files</strong>. Instagram will notify you when your file is ready to download.</li>
                 </ol>
                 <p class="pt-2 font-semibold">Once you have the `.zip` file, you can upload it here directly using <strong>Option A</strong>.</p>
             </div>
