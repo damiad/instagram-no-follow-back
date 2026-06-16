@@ -103,7 +103,7 @@
                         <label for="directoryUpload" class="file-input-label">
                             <span id="directoryName">Click to select directory</span>
                         </label>
-                        <div class="tooltip">If you unzipped the file, you can select the parent folder (e.g., 'instagram-username_....').</div>
+                        <div class="tooltip">If you unzipped the file, select the `connections` folder or the full export folder.</div>
                     </div>
                 </div>
             </div>
@@ -318,16 +318,46 @@
                 }
             }
 
+            function extractUsername(entry) {
+                if (entry?.value) return entry.value;
+                if (entry?.href) {
+                    const username = entry.href.replace(/\/+$/, '').split('/').pop();
+                    if (username) return username;
+                }
+                return entry?.username || null;
+            }
+
+            function getRelationshipList(jsonData) {
+                if (Array.isArray(jsonData)) return jsonData;
+                if (typeof jsonData !== 'object' || jsonData === null) return null;
+
+                const knownKeys = [
+                    'relationships_following',
+                    'relationships_followers',
+                    'relationships_follow_requests_sent'
+                ];
+                for (const key of knownKeys) {
+                    if (Array.isArray(jsonData[key])) return jsonData[key];
+                }
+
+                for (const value of Object.values(jsonData)) {
+                    if (Array.isArray(value)) return value;
+                }
+                return null;
+            }
+
             function getUserData(jsonData, filePath) {
                 const userData = {};
-                // Handle both `following.json` and `pending_follow_requests.json` structures
-                let dataList = jsonData.relationships_following || jsonData.relationships_follow_requests_sent || jsonData;
-                 if (!Array.isArray(dataList)) throw new Error(`Expected an array of users in ${filePath}.`);
+                const dataList = getRelationshipList(jsonData);
+                if (!Array.isArray(dataList)) {
+                    throw new Error(`Expected an array of users in ${filePath}.`);
+                }
 
                 for (const item of dataList) {
                     if (item?.string_list_data) {
                         for (const entry of item.string_list_data) {
-                            if (entry.value && entry.timestamp) userData[entry.value] = entry.timestamp;
+                            const username = extractUsername(entry);
+                            if (username) userData[username] = entry.timestamp || 0;
                         }
                     }
                 }
@@ -336,15 +366,60 @@
 
             function getFollowerUsernames(jsonData, filePath) {
                 const usernames = new Set();
-                if (!Array.isArray(jsonData)) throw new Error(`Expected an array of followers in ${filePath}.`);
-                for (const item of jsonData) {
-                     if (item?.string_list_data) {
+                const dataList = getRelationshipList(jsonData);
+                if (!Array.isArray(dataList)) {
+                    throw new Error(`Expected an array of followers in ${filePath}.`);
+                }
+
+                for (const item of dataList) {
+                    if (item?.string_list_data) {
                         for (const entry of item.string_list_data) {
-                            if (entry.value) usernames.add(entry.value);
+                            const username = extractUsername(entry);
+                            if (username) usernames.add(username);
                         }
                     }
                 }
                 return usernames;
+            }
+
+            function getFileName(path) {
+                return path.split('/').pop();
+            }
+
+            function isFollowersFile(path) {
+                return /^followers_\d+\.json$/.test(getFileName(path));
+            }
+
+            function isFollowingFile(path) {
+                return /^following(_\d+)?\.json$/.test(getFileName(path));
+            }
+
+            function isPendingFile(path) {
+                return getFileName(path) === 'pending_follow_requests.json';
+            }
+
+            function isInFollowersAndFollowingFolder(path) {
+                return path.includes('followers_and_following/') ||
+                    (!path.includes('/') && (isFollowingFile(path) || isFollowersFile(path) || isPendingFile(path)));
+            }
+
+            function findExportFiles(fileContents) {
+                const paths = [...fileContents.keys()].filter(path => path.endsWith('.json'));
+                const relevantPaths = paths.filter(isInFollowersAndFollowingFolder);
+
+                const followingFilePaths = relevantPaths.filter(isFollowingFile);
+                const followerFilePaths = relevantPaths.filter(isFollowersFile);
+                const pendingFilePaths = relevantPaths.filter(isPendingFile);
+
+                return { followingFilePaths, followerFilePaths, pendingFilePaths };
+            }
+
+            function mergeUserDataMaps(maps) {
+                const merged = {};
+                for (const userData of maps) {
+                    Object.assign(merged, userData);
+                }
+                return merged;
             }
 
             async function startProcessing(mode) {
@@ -382,20 +457,23 @@
                     
                     loadingTextEl.textContent = 'Analyzing data...';
 
+                    const { followingFilePaths, followerFilePaths, pendingFilePaths } = findExportFiles(fileContents);
+
                     if (mode === 'non-followers') {
-                        const followingFilePath = [...fileContents.keys()].find(path => path.endsWith('followers_and_following/following.json'));
-                        const followerFilePaths = [...fileContents.keys()].filter(path => path.includes('followers_and_following/followers_') && path.endsWith('.json'));
+                        if (followingFilePaths.length === 0) {
+                            throw new Error("Could not find `following.json` (or `following_1.json`) inside `connections/followers_and_following`. Make sure you exported in JSON format and selected Followers and following.");
+                        }
+                        if (followerFilePaths.length === 0) {
+                            throw new Error("Could not find any `followers_*.json` files inside `connections/followers_and_following`. Make sure you exported in JSON format and selected Followers and following.");
+                        }
 
-                        if (!followingFilePath) throw new Error("Could not find `following.json` inside the `followers_and_following` folder.");
-                        if (followerFilePaths.length === 0) throw new Error("Could not find any `followers_*.json` files.");
+                        const followingData = mergeUserDataMaps(
+                            followingFilePaths.map(path => getUserData(parseJsonData(fileContents.get(path), path), path))
+                        );
 
-                        const followingText = fileContents.get(followingFilePath);
-                        const followingData = getUserData(parseJsonData(followingText, 'following.json'), 'following.json');
-                        
                         const followerUsernames = new Set();
-                        for(const path of followerFilePaths) {
-                            const followerText = fileContents.get(path);
-                            const usernames = getFollowerUsernames(parseJsonData(followerText, path), path);
+                        for (const path of followerFilePaths) {
+                            const usernames = getFollowerUsernames(parseJsonData(fileContents.get(path), path), path);
                             usernames.forEach(u => followerUsernames.add(u));
                         }
 
@@ -403,17 +481,18 @@
                         processedData = notFollowingBackUsernames
                             .map(username => ({ username, timestamp: followingData[username] }))
                             .sort((a, b) => a.timestamp - b.timestamp);
-                        
+
                         const followingCount = Object.keys(followingData).length;
                         const followersCount = followerUsernames.size;
                         displayResults(followingCount, followersCount);
 
                     } else if (mode === 'pending') {
-                        const pendingFilePath = [...fileContents.keys()].find(path => path.endsWith('followers_and_following/pending_follow_requests.json'));
-                        if (!pendingFilePath) throw new Error("Could not find `pending_follow_requests.json`. Make sure it's in your `followers_and_following` folder from your data export.");
+                        const pendingFilePath = pendingFilePaths[0];
+                        if (!pendingFilePath) {
+                            throw new Error("Could not find `pending_follow_requests.json` inside `connections/followers_and_following`. Make sure it's included in your data export.");
+                        }
 
-                        const pendingText = fileContents.get(pendingFilePath);
-                        const pendingData = getUserData(parseJsonData(pendingText, 'pending_follow_requests.json'), 'pending_follow_requests.json');
+                        const pendingData = getUserData(parseJsonData(fileContents.get(pendingFilePath), pendingFilePath), pendingFilePath);
                         
                         processedData = Object.entries(pendingData)
                             .map(([username, timestamp]) => ({ username, timestamp }))
