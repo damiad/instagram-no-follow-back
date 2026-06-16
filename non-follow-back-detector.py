@@ -3,6 +3,7 @@ import webbrowser
 import time
 import glob
 import os
+import re
 
 # Config:
 # Number of oldest non-followers to skip from opening in tabs
@@ -24,16 +25,37 @@ def find_export_directory():
             return export_path
     return None
 
+def username_from_string(value):
+    """Extract a clean username from a value, href, or URL fragment."""
+    if not value:
+        return None
+
+    s = str(value).strip()
+
+    url_match = re.search(r'(?:https?://)?(?:www\.)?instagram\.com/(?:_u/)?([^/?#]+)', s, re.I)
+    if url_match:
+        s = url_match.group(1)
+
+    if s.startswith('_u/'):
+        s = s[3:]
+
+    s = s.lstrip('@').rstrip('/')
+
+    if not s or s in ('_u', 'www.instagram.com'):
+        return None
+    return s
+
 def extract_username(entry):
     """Extract a username from a string_list_data entry."""
-    if entry.get('value'):
-        return entry['value']
-    href = entry.get('href', '')
-    if href:
-        username = href.rstrip('/').split('/')[-1]
+    for candidate in (entry.get('value'), entry.get('username'), entry.get('href')):
+        username = username_from_string(candidate)
         if username:
             return username
-    return entry.get('username')
+    return None
+
+def profile_url(username):
+    """Build an Instagram profile URL using the /_u/ path."""
+    return f"https://www.instagram.com/_u/{username}"
 
 def get_relationship_list(data):
     """Return the list of relationship entries from old or new JSON formats."""
@@ -143,7 +165,7 @@ def main():
         
         tabs_opened = 0
         for i, (username, timestamp) in enumerate(sorted_list):
-            url = f"https://www.instagram.com/{username}"
+            url = profile_url(username)
 
             if i < skip_oldest_followers:
                 print(url)
