@@ -12,34 +12,61 @@ skip_oldest_followers = 0
 max_tabs_to_open = 37
 # End Config
 
-def get_user_data_from_file(file_path, key):
+EXPORT_PATHS = [
+    'connections/followers_and_following',
+    'followers_and_following',
+]
+
+def find_export_directory():
+    """Find the followers_and_following directory in old or new export layouts."""
+    for export_path in EXPORT_PATHS:
+        if os.path.isdir(export_path):
+            return export_path
+    return None
+
+def extract_username(entry):
+    """Extract a username from a string_list_data entry."""
+    if entry.get('value'):
+        return entry['value']
+    href = entry.get('href', '')
+    if href:
+        username = href.rstrip('/').split('/')[-1]
+        if username:
+            return username
+    return entry.get('username')
+
+def get_relationship_list(data):
+    """Return the list of relationship entries from old or new JSON formats."""
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict):
+        for key in (
+            'relationships_following',
+            'relationships_followers',
+            'relationships_follow_requests_sent',
+        ):
+            if isinstance(data.get(key), list):
+                return data[key]
+        for value in data.values():
+            if isinstance(value, list):
+                return value
+    return []
+
+def get_user_data_from_file(file_path):
     """
     Reads a JSON file and extracts a dictionary of usernames and timestamps.
-
-    Args:
-        file_path (str): The path to the JSON file.
-        key (str): The top-level key in the JSON file 
-                   (e.g., 'relationships_following').
-
-    Returns:
-        dict: A dictionary mapping usernames to their timestamps.
     """
     user_data = {}
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            
-            # The structure for followers is a simple list of objects,
-            # while for following it's nested under a key.
-            if isinstance(data, dict):
-                data_list = data.get(key, [])
-            else:
-                data_list = data
+            data_list = get_relationship_list(data)
 
             for item in data_list:
                 for entry in item.get("string_list_data", []):
-                    # Store username and its corresponding timestamp
-                    user_data[entry.get("value")] = entry.get("timestamp", 0)
+                    username = extract_username(entry)
+                    if username:
+                        user_data[username] = entry.get("timestamp", 0)
     except FileNotFoundError:
         print(f"Warning: File not found at {file_path}. Skipping.")
     except json.JSONDecodeError:
@@ -53,52 +80,53 @@ def main():
     """
     Main function to find users you follow who don't follow you back.
     """
-    # --- Configuration ---
-    # Path to the directory containing your Instagram data
-    followers_and_following_path = 'followers_and_following/'
-    
-    # Path to your 'following.json' file
-    following_file = os.path.join(followers_and_following_path, 'following.json')
-    
-    # Dynamically find all follower files using a wildcard pattern
-    follower_files_pattern = os.path.join(followers_and_following_path, 'followers_*.json')
-    follower_files = glob.glob(follower_files_pattern)
-    # --- End Configuration ---
-
-    if not follower_files:
-        print(f"Error: No follower files found in '{followers_and_following_path}'. Make sure your files are in the correct directory.")
+    followers_and_following_path = find_export_directory()
+    if not followers_and_following_path:
+        print("Error: Could not find your Instagram export data.")
+        print("Place the export folder at one of these locations:")
+        for export_path in EXPORT_PATHS:
+            print(f"  - {export_path}/")
         return
 
+    following_files = sorted(glob.glob(os.path.join(followers_and_following_path, 'following*.json')))
+    follower_files = sorted(glob.glob(os.path.join(followers_and_following_path, 'followers_*.json')))
+
+    if not following_files:
+        print(f"Error: No following file found in '{followers_and_following_path}'.")
+        print("Expected following.json or following_1.json.")
+        return
+
+    if not follower_files:
+        print(f"Error: No follower files found in '{followers_and_following_path}'.")
+        print("Expected followers_1.json, followers_2.json, etc.")
+        return
+
+    print(f"Using export directory: {followers_and_following_path}")
     print(f"Found {len(follower_files)} follower file(s) to process.")
 
-    # Get the dictionary of users you are following with their timestamps
     print("\nProcessing your 'following' list...")
-    following_data = get_user_data_from_file(following_file, 'relationships_following')
+    following_data = {}
+    for following_file in following_files:
+        following_data.update(get_user_data_from_file(following_file))
     if following_data:
         print(f"Found {len(following_data)} accounts you are following.")
 
-    # Combine all followers from the different follower files into a set
     followers = set()
     print("\nProcessing your 'followers' lists...")
     for follower_file in follower_files:
-        # We only need the usernames (keys) from the follower files
-        followers.update(get_user_data_from_file(follower_file, '').keys())
+        followers.update(get_user_data_from_file(follower_file).keys())
         
     if followers:
         print(f"Found a total of {len(followers)} followers.")
 
-    # Find the users who are in your 'following' list but not in your 'followers' list
     if following_data and followers:
-        # Get the usernames of those who don't follow back
         not_following_back_usernames = following_data.keys() - followers
         
-        # Create a list of tuples (username, timestamp) for sorting
         not_following_back_list = [
             (username, following_data[username]) 
             for username in not_following_back_usernames
         ]
         
-        # Sort the list by timestamp (the second element in the tuple), from oldest to newest
         sorted_list = sorted(not_following_back_list, key=lambda item: item[1])
 
         print(f"\n--- {len(sorted_list)} Users Who Don't Follow You Back (sorted oldest to newest) ---")
@@ -106,7 +134,6 @@ def main():
 
         browser = None
         
-        # Try to get the Google Chrome browser controller.
         try:
             browser = webbrowser.get('chrome')
             list_for_tabs = sorted_list[skip_oldest_followers:]
@@ -118,18 +145,14 @@ def main():
         for i, (username, timestamp) in enumerate(sorted_list):
             url = f"https://www.instagram.com/{username}"
 
-            # Check if the user is in the group to be skipped from tab opening
             if i < skip_oldest_followers:
                 print(url)
-            # If not in the skip group, check if we should open a tab
             elif browser and tabs_opened < max_tabs_to_open:
                 browser.open_new_tab(url)
                 print(f"Opening tab ({tabs_opened + 1}/{max_tabs_to_open}): {url}")
                 tabs_opened += 1
-                # Add a small delay to prevent overwhelming the browser
                 time.sleep(0.1)
             else:
-                # Otherwise (no browser, or max tabs reached), just print the URL
                 print(url)
     else:
         print("\nCould not perform the comparison due to missing data.")

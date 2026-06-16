@@ -60,7 +60,7 @@ For users who prefer a command-line interface, the original Python script is sti
 ### Instructions
 
 1.  Download your Instagram data as described in Step 1 above and unzip it.
-2.  Place the `followers_and_following` directory inside the project folder.
+2.  Unzip your export and place the `connections/followers_and_following` folder in the project directory, or copy the whole `connections` folder.
 3.  Run the script from your terminal:
     ```bash
     python3 non-follow-back-detector.py
