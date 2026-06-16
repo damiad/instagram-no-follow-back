@@ -318,13 +318,31 @@
                 }
             }
 
+            function usernameFromString(str) {
+                if (!str) return null;
+                let s = String(str).trim();
+
+                const urlMatch = s.match(/(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:_u\/)?([^/?#]+)/i);
+                if (urlMatch?.[1]) s = urlMatch[1];
+
+                if (s.startsWith('_u/')) s = s.slice(3);
+
+                s = s.replace(/^@/, '').replace(/\/+$/, '');
+
+                if (!s || s === '_u' || s === 'www.instagram.com') return null;
+                return s;
+            }
+
             function extractUsername(entry) {
-                if (entry?.value) return entry.value;
-                if (entry?.href) {
-                    const username = entry.href.replace(/\/+$/, '').split('/').pop();
+                for (const candidate of [entry?.value, entry?.username, entry?.href]) {
+                    const username = usernameFromString(candidate);
                     if (username) return username;
                 }
-                return entry?.username || null;
+                return null;
+            }
+
+            function profileUrl(username) {
+                return `https://www.instagram.com/_u/${encodeURIComponent(username)}`;
             }
 
             function getRelationshipList(jsonData) {
@@ -545,7 +563,7 @@
                     popupWarningEl.classList.remove('hidden');
                     openTabsBtn.onclick = () => {
                         usersToOpen.forEach(user => {
-                            window.open(`https://www.instagram.com/${user.username}`, '_blank');
+                            window.open(profileUrl(user.username), '_blank');
                         });
                     };
                 } else {
@@ -568,7 +586,7 @@
                             <div class="font-medium text-gray-800">${index + 1}. ${user.username}</div>
                             <div class="flex items-center space-x-4">
                                 <span class="text-sm text-gray-500">${actionText}: ${date}</span>
-                                <a href="https://www.instagram.com/${user.username}" target="_blank" class="text-indigo-600 hover:text-indigo-800 font-semibold">
+                                <a href="${profileUrl(user.username)}" target="_blank" class="text-indigo-600 hover:text-indigo-800 font-semibold">
                                     Visit Profile →
                                 </a>
                             </div>
